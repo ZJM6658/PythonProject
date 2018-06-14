@@ -66,6 +66,13 @@ def main():
 		print('请传入必要参数-mobile')
 		return
 
+	# print INPUT_PARAMS
+	limit = int(INPUT_PARAMS['limit'])
+	offset = int(INPUT_PARAMS['offset'])
+	if limit < 0 or offset < 0 or limit > 2000 or offset > 2000 or (offset + limit) > 2000:
+		print('limit 和 offset参数必须>=0, <2000, 且limit + offset < 2000')
+		return
+
 	checkAccessToken()
 	pass
 
@@ -90,10 +97,11 @@ def checkAccessToken():
 def prepareSend():
 	userSQL = 'select * from y_user where mobile_phone=%s && isdel=0' %(INPUT_PARAMS['mobile'], )
 	result = getDataFromDataBase(userSQL)
-	accepterInfo = result[0]
-	if accepterInfo == None:
-		print "未查询到手机号码为%s的用户" %(INPUT_PARAMS['mobile'])
+
+	if len(result) == 0 :
+		print "未查询到手机号码为%s的用户，请检查手机号是否正确" %(INPUT_PARAMS['mobile'])
 		return
+	accepterInfo = result[0]
 
 	sendersSQL = 'select * from y_user where mobile_phone like "1300000%%" && isdel=0 limit %s offset %s' %(INPUT_PARAMS['limit'], INPUT_PARAMS['offset'])
 	result = getDataFromDataBase(sendersSQL)
@@ -123,8 +131,7 @@ def sendMessage(fromUser, toImId):
 			"type": "txt",
 			"msg": INPUT_PARAMS['text']
 		},
-		#13000000000
-		"from": fromImId,#"im_378e54cbc6e5453eaad0da67e8f3f1e0",
+		"from": fromImId,
 		"ext": {
 			"attr1": "v1"
 		}
